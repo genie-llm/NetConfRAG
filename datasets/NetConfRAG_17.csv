@@ -1,0 +1,18 @@
+question
+What is the command used to dynamically assign an IP address to interface FastEthernet0/0/0 via DHCP?
+What is the command to enable OSPF under VRF custA with router ID 10.0.0.103?
+How to configure OSPF authentication (MD  key 12345) on interface GigabitEthernet0/1?
+How to configure OSPF to redistribute connected routes?
+How to configure an ACL that allows only 192.168.10.0/24 to access 10.0.0.1 via SSH?
+How to configure a DHCP relay agent on interface GigabitEthernet0/1 with server 10.0.0.5?
+How to configure DHCP for multiple VLANs (10 and 20)?
+How to configure an ACL to block all traffic from subnet 192.168.100.0/24 except DNS (UDP 53)?
+How to configure DHCP relay agent with multiple servers (10.1.1.1 and 10.2.2.2) on VLAN 30 interface?
+How to configure DHCP option 66 (TFTP server name tftp.example.com) and option 150 (server IP 10.10.10.5) for a VOIP pool?
+How to configure ACL for denying and logging all denied packets from subnet 172.16.20.0/24?
+How to configure a DHCP pool with two DNS servers (8.8.8.8 and 8.8.4.4) and lease time of 12 hours?
+How to configure an ACL to allow only SSH (22) and HTTPS (443) from 192.168.10.0/24 to 10.0.0.0/24?
+How to configure DHCP snooping on VLANs 10 and 20 trusting uplink GigabitEthernet0/1?
+How to configure a DHCP pool with default gateway 2 DNS servers and domain name and a custom lease of 2 days?
+How to configure ACL to block all traffic from 203.0.113.0/24 and log it?
+How to configure ACL with object-groups for multiple services (HTTP  HTTPS SSH)?

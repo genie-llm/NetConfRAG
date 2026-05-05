@@ -1,0 +1,842 @@
+question,q_clean,ground_truth
+Adjust the OSPFv3 reference bandwidth to 100 Gbps for high-speed interfaces.,adjust the ospfv3 reference bandwidth to 100 gbps for high-speed interfaces.,"enable
+configure terminal
+ipv6 router ospf 100
+auto-cost reference-bandwidth 100000
+end"
+Apply a route-map that sets the default next-hop to 10.20.30.1 for traffic originating from the Guest subnet 10.0.0.0/24.,apply a route-map that sets the default next-hop to 10.20.30.1 for traffic originating from the guest subnet 10.0.0.0/24.,"enable
+configure terminal
+access-list 5 permit 10.0.0.0 0.0.0.255
+route-map GUEST_TRAFFIC permit 10
+match ip address 5
+set ip default next-hop 10.20.30.1
+exit
+interface GigabitEthernet0/3
+ip policy route-map GUEST_TRAFFIC
+end"
+Apply the NAC-RESTRICT access list and activate DHCP snooping and dynamic ARP inspection for the defined management and user VLANs.,apply the nac-restrict access list and activate dhcp snooping and dynamic arp inspection for the defined management and user vlans.,"ip access-list extended NAC-RESTRICT
+permit ip 10.1.0.0 0.0.0.255 10.2.0.0 0.0.0.255 eq 80
+deny ip any any log
+ip dhcp snooping vlan 10,20,30,99
+ip dhcp snooping
+ip arp inspection vlan 10,20,30,99"
+Change the lease time for all current and future clients in the 'General_Users' DHCP pool to infinite.,change the lease time for all current and future clients in the 'general_users' dhcp pool to infinite.,"enable
+configure terminal
+ip dhcp pool General_Users
+lease infinite
+exit
+end"
+Configure a default information originate command to redistribute a default route into OSPFv3.,configure a default information originate command to redistribute a default route into ospfv3.,"enable
+configure terminal
+ipv6 router ospf 1
+default-information originate
+end"
+"Configure a DHCP server pool for VoIP phones on VLAN 20 using subnet 172.16.20.0/24, providing a DNS server at 8.8.8.8 and a TFTP server option.","configure a dhcp server pool for voip phones on vlan 20 using subnet 172.16.20.0/24, providing a dns server at 8.8.8.8 and a tftp server option.","enable
+configure terminal
+ip dhcp pool VOICE_VLAN
+network 172.16.20.0 255.255.255.0
+default-router 172.16.20.1
+dns-server 8.8.8.8
+option 150 ip 172.16.20.5
+exit
+end"
+Configure an access control list to define traffic between local subnet 10.1.1.0/24 and remote 10.2.2.0/24.,configure an access control list to define traffic between local subnet 10.1.1.0/24 and remote 10.2.2.0/24.,"enable
+configure terminal
+ip access-list extended ACL-VPN-TRAFFIC
+ permit ip 10.1.1.0 0.0.0.255 10.2.2.0 0.0.0.255
+exit
+end"
+Configure OSPFv3 on the router globally using a specific router ID of 1.1.1.1.,configure ospfv3 on the router globally using a specific router id of 1.1.1.1.,"enable
+configure terminal
+ipv6 router ospf 1
+router-id 1.1.1.1
+end"
+Configure OSPFv3 summary prefix for area 1.,configure ospfv3 summary prefix for area 1.,"enable
+configure terminal
+ipv6 router ospf 1
+area 1 range 2001:db8:cafe::/48
+end"
+Configure PBR to force all traffic matching ACL 10 to exit via interface Tunnel0.,configure pbr to force all traffic matching acl 10 to exit via interface tunnel0.,"enable
+configure terminal
+access-list 10 permit 192.168.200.0 0.0.0.255
+route-map VPN_TUNNEL permit 10
+match ip address 10
+set interface Tunnel0
+exit
+interface GigabitEthernet0/7
+ip policy route-map VPN_TUNNEL
+end"
+Configure PBR to set the IP precedence to critical for traffic matching access-list 101 coming into interface Gi0/0.,configure pbr to set the ip precedence to critical for traffic matching access-list 101 coming into interface gi0/0.,"enable
+configure terminal
+access-list 101 permit ip any any
+route-map QOS_POLICY permit 10
+match ip address 101
+set ip precedence critical
+exit
+interface GigabitEthernet0/0
+ip policy route-map QOS_POLICY
+end"
+Configure the DHCP pool for the data center using subnet 192.168.200.0/26 and set the DNS servers to 192.168.200.2 and 192.168.200.3.,configure the dhcp pool for the data center using subnet 192.168.200.0/26 and set the dns servers to 192.168.200.2 and 192.168.200.3.,"enable
+configure terminal
+ip dhcp pool DATA_CENTER
+network 192.168.200.0 255.255.255.192
+default-router 192.168.200.1
+dns-server 192.168.200.2 192.168.200.3
+exit
+end"
+Configure the router to provide IP addresses to the IoT subnet 192.168.100.0/24 with a lease duration of only 1 hour.,configure the router to provide ip addresses to the iot subnet 192.168.100.0/24 with a lease duration of only 1 hour.,"enable
+configure terminal
+ip dhcp pool IOT_DEVICES
+network 192.168.100.0 255.255.255.0
+default-router 192.168.100.1
+lease 0 1 0
+exit
+end"
+Create a DHCP pool for a small testing lab on 192.168.254.0/28.,create a dhcp pool for a small testing lab on 192.168.254.0/28.,"enable
+configure terminal
+ip dhcp pool TEST_LAB
+network 192.168.254.0 255.255.255.240
+default-router 192.168.254.1
+exit
+end"
+Create a DHCP pool named OFFICE_LAN for the 192.168.10.0/24 subnet with a default gateway of 192.168.10.1.,create a dhcp pool named office_lan for the 192.168.10.0/24 subnet with a default gateway of 192.168.10.1.,"enable
+configure terminal
+ip dhcp pool OFFICE_LAN
+network 192.168.10.0 255.255.255.0
+default-router 192.168.10.1
+exit
+end"
+Create a policy-based route to set the next-hop to 192.168.50.1 for all UDP traffic on port 53.,create a policy-based route to set the next-hop to 192.168.50.1 for all udp traffic on port 53.,"enable
+configure terminal
+access-list 110 permit udp any any eq 53
+route-map DNS_REDIRECT permit 10
+match ip address 110
+set ip next-hop 192.168.50.1
+exit
+interface Vlan10
+ip policy route-map DNS_REDIRECT
+end"
+Create a route-map that drops traffic from 172.31.0.0/24 immediately.,create a route-map that drops traffic from 172.31.0.0/24 immediately.,"enable
+configure terminal
+access-list 40 permit 172.31.0.0 0.0.0.255
+route-map DROP_POLICY deny 10
+match ip address 40
+exit
+route-map DROP_POLICY permit 20
+exit
+interface GigabitEthernet0/8
+ip policy route-map DROP_POLICY
+end"
+Create a route-map to redirect traffic from 192.168.10.0/24 to next-hop 10.1.1.5.,create a route-map to redirect traffic from 192.168.10.0/24 to next-hop 10.1.1.5.,"enable
+configure terminal
+access-list 10 permit 192.168.10.0 0.0.0.255
+route-map PBR_REDIRECT permit 10
+match ip address 10
+set ip next-hop 10.1.1.5
+exit
+interface GigabitEthernet0/1
+ip policy route-map PBR_REDIRECT
+end"
+Create a stub area for OSPFv3 area 10.,create a stub area for ospfv3 area 10.,"enable
+configure terminal
+ipv6 router ospf 1
+area 10 stub
+end"
+Create extended ACL BLOCK_TELNET permitting SSH from 10.1.0.0 to host 10.0.0.1.,create extended acl block_telnet permitting ssh from 10.1.0.0 to host 10.0.0.1.,"enable
+configure terminal
+ip access-list extended BLOCK_TELNET
+permit tcp 10.1.0.0 0.255.255.255 host 10.0.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL BLOCK_TELNET permitting SSH from 10.1.0.0 to host 172.16.0.1.,create extended acl block_telnet permitting ssh from 10.1.0.0 to host 172.16.0.1.,"enable
+configure terminal
+ip access-list extended BLOCK_TELNET
+permit tcp 10.1.0.0 0.0.255.255 host 172.16.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL BLOCK_TELNET permitting SSH from 10.1.0.0 to host 192.168.1.1.,create extended acl block_telnet permitting ssh from 10.1.0.0 to host 192.168.1.1.,"enable
+configure terminal
+ip access-list extended BLOCK_TELNET
+permit tcp 10.1.0.0 0.0.0.255 host 192.168.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL BLOCK_TELNET permitting SSH from 172.16.0.0 to host 10.10.10.1.,create extended acl block_telnet permitting ssh from 172.16.0.0 to host 10.10.10.1.,"enable
+configure terminal
+ip access-list extended BLOCK_TELNET
+permit tcp 172.16.0.0 0.0.0.255 host 10.10.10.1 eq 22
+deny ip any any
+end"
+Create extended ACL BLOCK_TELNET permitting SSH from 172.16.0.0 to host 172.16.0.1.,create extended acl block_telnet permitting ssh from 172.16.0.0 to host 172.16.0.1.,"enable
+configure terminal
+ip access-list extended BLOCK_TELNET
+permit tcp 172.16.0.0 0.0.0.255 host 172.16.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL BLOCK_TELNET permitting SSH from 172.16.0.0 to host 192.168.1.1.,create extended acl block_telnet permitting ssh from 172.16.0.0 to host 192.168.1.1.,"enable
+configure terminal
+ip access-list extended BLOCK_TELNET
+permit tcp 172.16.0.0 0.0.255.255 host 192.168.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL BLOCK_TELNET permitting SSH from 192.168.10.0 to host 10.10.10.1.,create extended acl block_telnet permitting ssh from 192.168.10.0 to host 10.10.10.1.,"enable
+configure terminal
+ip access-list extended BLOCK_TELNET
+permit tcp 192.168.10.0 0.0.0.255 host 10.10.10.1 eq 22
+deny ip any any
+end"
+Create extended ACL BLOCK_TELNET permitting SSH from 192.168.10.0 to host 192.168.100.1.,create extended acl block_telnet permitting ssh from 192.168.10.0 to host 192.168.100.1.,"enable
+configure terminal
+ip access-list extended BLOCK_TELNET
+permit tcp 192.168.10.0 0.255.255.255 host 192.168.100.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 10.0.0.0 to host 10.0.0.1.,create extended acl internet_access permitting ssh from 10.0.0.0 to host 10.0.0.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 10.0.0.0 0.0.255.255 host 10.0.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 10.0.0.0 to host 172.31.0.1.,create extended acl internet_access permitting ssh from 10.0.0.0 to host 172.31.0.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 10.0.0.0 0.0.0.255 host 172.31.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 10.0.0.0 to host 192.168.100.1.,create extended acl internet_access permitting ssh from 10.0.0.0 to host 192.168.100.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 10.0.0.0 0.0.0.255 host 192.168.100.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 10.0.0.0 to host 192.168.1.1.,create extended acl internet_access permitting ssh from 10.0.0.0 to host 192.168.1.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 10.0.0.0 0.0.255.255 host 192.168.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 10.1.0.0 to host 172.31.0.1.,create extended acl internet_access permitting ssh from 10.1.0.0 to host 172.31.0.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 10.1.0.0 0.255.255.255 host 172.31.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 172.16.0.0 to host 10.0.1.1.,create extended acl internet_access permitting ssh from 172.16.0.0 to host 10.0.1.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 172.16.0.0 0.255.255.255 host 10.0.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 172.16.0.0 to host 10.1.1.1.,create extended acl internet_access permitting ssh from 172.16.0.0 to host 10.1.1.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 172.16.0.0 0.255.255.255 host 10.1.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 172.16.0.0 to host 192.168.100.1.,create extended acl internet_access permitting ssh from 172.16.0.0 to host 192.168.100.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 172.16.0.0 0.0.0.255 host 192.168.100.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 172.16.0.0 to host 192.168.1.1.,create extended acl internet_access permitting ssh from 172.16.0.0 to host 192.168.1.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 172.16.0.0 0.0.0.255 host 192.168.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 192.168.10.0 to host 10.0.0.1.,create extended acl internet_access permitting ssh from 192.168.10.0 to host 10.0.0.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 192.168.10.0 0.255.255.255 host 10.0.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL INTERNET_ACCESS permitting SSH from 192.168.10.0 to host 10.1.1.1.,create extended acl internet_access permitting ssh from 192.168.10.0 to host 10.1.1.1.,"enable
+configure terminal
+ip access-list extended INTERNET_ACCESS
+permit tcp 192.168.10.0 0.255.255.255 host 10.1.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 10.0.0.0 to host 10.10.10.1.,create extended acl mgmt_access permitting ssh from 10.0.0.0 to host 10.10.10.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 10.0.0.0 0.0.0.255 host 10.10.10.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 10.1.0.0 to host 10.0.0.1.,create extended acl mgmt_access permitting ssh from 10.1.0.0 to host 10.0.0.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 10.1.0.0 0.0.255.255 host 10.0.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 10.1.0.0 to host 10.10.10.1.,create extended acl mgmt_access permitting ssh from 10.1.0.0 to host 10.10.10.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 10.1.0.0 0.0.0.255 host 10.10.10.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 10.1.0.0 to host 172.16.0.1.,create extended acl mgmt_access permitting ssh from 10.1.0.0 to host 172.16.0.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 10.1.0.0 0.0.255.255 host 172.16.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 10.1.0.0 to host 172.31.0.1.,create extended acl mgmt_access permitting ssh from 10.1.0.0 to host 172.31.0.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 10.1.0.0 0.0.255.255 host 172.31.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 172.16.0.0 to host 10.1.1.1.,create extended acl mgmt_access permitting ssh from 172.16.0.0 to host 10.1.1.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 172.16.0.0 0.255.255.255 host 10.1.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 172.16.0.0 to host 192.168.100.1.,create extended acl mgmt_access permitting ssh from 172.16.0.0 to host 192.168.100.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 172.16.0.0 0.255.255.255 host 192.168.100.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 172.16.0.0 to host 192.168.1.1.,create extended acl mgmt_access permitting ssh from 172.16.0.0 to host 192.168.1.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 172.16.0.0 0.255.255.255 host 192.168.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 192.168.10.0 to host 10.0.0.1.,create extended acl mgmt_access permitting ssh from 192.168.10.0 to host 10.0.0.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 192.168.10.0 0.0.255.255 host 10.0.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 192.168.10.0 to host 10.1.1.1.,create extended acl mgmt_access permitting ssh from 192.168.10.0 to host 10.1.1.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 192.168.10.0 0.0.0.255 host 10.1.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 192.168.10.0 to host 192.168.100.1.,create extended acl mgmt_access permitting ssh from 192.168.10.0 to host 192.168.100.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 192.168.10.0 0.0.0.255 host 192.168.100.1 eq 22
+deny ip any any
+end"
+Create extended ACL MGMT_ACCESS permitting SSH from 192.168.10.0 to host 192.168.1.1.,create extended acl mgmt_access permitting ssh from 192.168.10.0 to host 192.168.1.1.,"enable
+configure terminal
+ip access-list extended MGMT_ACCESS
+permit tcp 192.168.10.0 0.255.255.255 host 192.168.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL PERMIT_SSH permitting SSH from 10.0.0.0 to host 172.16.0.1.,create extended acl permit_ssh permitting ssh from 10.0.0.0 to host 172.16.0.1.,"enable
+configure terminal
+ip access-list extended PERMIT_SSH
+permit tcp 10.0.0.0 0.0.255.255 host 172.16.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL PERMIT_SSH permitting SSH from 10.0.0.0 to host 192.168.1.1.,create extended acl permit_ssh permitting ssh from 10.0.0.0 to host 192.168.1.1.,"enable
+configure terminal
+ip access-list extended PERMIT_SSH
+permit tcp 10.0.0.0 0.255.255.255 host 192.168.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL PERMIT_SSH permitting SSH from 10.1.0.0 to host 10.0.0.1.,create extended acl permit_ssh permitting ssh from 10.1.0.0 to host 10.0.0.1.,"enable
+configure terminal
+ip access-list extended PERMIT_SSH
+permit tcp 10.1.0.0 0.0.255.255 host 10.0.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL PERMIT_SSH permitting SSH from 10.1.0.0 to host 172.31.0.1.,create extended acl permit_ssh permitting ssh from 10.1.0.0 to host 172.31.0.1.,"enable
+configure terminal
+ip access-list extended PERMIT_SSH
+permit tcp 10.1.0.0 0.255.255.255 host 172.31.0.1 eq 22
+deny ip any any
+end"
+Create extended ACL PERMIT_SSH permitting SSH from 10.1.0.0 to host 192.168.100.1.,create extended acl permit_ssh permitting ssh from 10.1.0.0 to host 192.168.100.1.,"enable
+configure terminal
+ip access-list extended PERMIT_SSH
+permit tcp 10.1.0.0 0.255.255.255 host 192.168.100.1 eq 22
+deny ip any any
+end"
+Create extended ACL PERMIT_SSH permitting SSH from 192.168.10.0 to host 10.0.1.1.,create extended acl permit_ssh permitting ssh from 192.168.10.0 to host 10.0.1.1.,"enable
+configure terminal
+ip access-list extended PERMIT_SSH
+permit tcp 192.168.10.0 0.0.255.255 host 10.0.1.1 eq 22
+deny ip any any
+end"
+Create extended ACL PERMIT_SSH permitting SSH from 192.168.10.0 to host 10.1.1.1.,create extended acl permit_ssh permitting ssh from 192.168.10.0 to host 10.1.1.1.,"enable
+configure terminal
+ip access-list extended PERMIT_SSH
+permit tcp 192.168.10.0 0.255.255.255 host 10.1.1.1 eq 22
+deny ip any any
+end"
+Define a DHCP pool for remote branch office 05 using subnet 172.30.5.0/24 and set the NetBIOS name server to 172.30.5.10.,define a dhcp pool for remote branch office 05 using subnet 172.30.5.0/24 and set the netbios name server to 172.30.5.10.,"enable
+configure terminal
+ip dhcp pool BRANCH_05
+network 172.30.5.0 255.255.255.0
+default-router 172.30.5.1
+netbios-name-server 172.30.5.10
+exit
+end"
+Enable LDP IGP synchronization on OSPF process 1.,enable ldp igp synchronization on ospf process 1.,"enable
+configure terminal
+router ospf 1
+mpls ldp sync
+end"
+Enable OSPF 100 under VRF custA with router-id 172.16.0.1.,enable ospf 100 under vrf custa with router-id 172.16.0.1.,"enable
+configure terminal
+router ospf 100 vrf custA
+router-id 172.16.0.1
+end"
+Enable OSPF 100 under VRF custB with router-id 10.1.1.1.,enable ospf 100 under vrf custb with router-id 10.1.1.1.,"enable
+configure terminal
+router ospf 100 vrf custB
+router-id 10.1.1.1
+end"
+Enable OSPF 100 under VRF INTERNET with router-id 10.0.1.1.,enable ospf 100 under vrf internet with router-id 10.0.1.1.,"enable
+configure terminal
+router ospf 100 vrf INTERNET
+router-id 10.0.1.1
+end"
+Enable OSPF 10 under VRF custA with router-id 172.31.0.1.,enable ospf 10 under vrf custa with router-id 172.31.0.1.,"enable
+configure terminal
+router ospf 10 vrf custA
+router-id 172.31.0.1
+end"
+Enable OSPF 1 under VRF INTERNET with router-id 10.1.1.1.,enable ospf 1 under vrf internet with router-id 10.1.1.1.,"enable
+configure terminal
+router ospf 1 vrf INTERNET
+router-id 10.1.1.1
+end"
+Enable OSPF process 100 and advertise 10.0.0.0 0.0.255.255 in area 1.,enable ospf process 100 and advertise 10.0.0.0 0.0.255.255 in area 1.,"enable
+configure terminal
+router ospf 100
+network 10.0.0.0 0.0.255.255 area 1
+end"
+Enable OSPF process 100 and advertise 10.0.0.0 0.255.255.255 in area 10.,enable ospf process 100 and advertise 10.0.0.0 0.255.255.255 in area 10.,"enable
+configure terminal
+router ospf 100
+network 10.0.0.0 0.255.255.255 area 10
+end"
+Enable OSPF process 100 and advertise 10.0.0.0 0.255.255.255 in area 100.,enable ospf process 100 and advertise 10.0.0.0 0.255.255.255 in area 100.,"enable
+configure terminal
+router ospf 100
+network 10.0.0.0 0.255.255.255 area 100
+end"
+Enable OSPF process 100 and advertise 10.1.0.0 0.0.255.255 in area 10.,enable ospf process 100 and advertise 10.1.0.0 0.0.255.255 in area 10.,"enable
+configure terminal
+router ospf 100
+network 10.1.0.0 0.0.255.255 area 10
+end"
+Enable OSPF process 100 and advertise 10.1.0.0 0.255.255.255 in area 0.,enable ospf process 100 and advertise 10.1.0.0 0.255.255.255 in area 0.,"enable
+configure terminal
+router ospf 100
+network 10.1.0.0 0.255.255.255 area 0
+end"
+Enable OSPF process 100 and advertise 172.16.0.0 0.0.0.255 in area 1.,enable ospf process 100 and advertise 172.16.0.0 0.0.0.255 in area 1.,"enable
+configure terminal
+router ospf 100
+network 172.16.0.0 0.0.0.255 area 1
+end"
+Enable OSPF process 100 and advertise 172.16.0.0 0.0.255.255 in area 100.,enable ospf process 100 and advertise 172.16.0.0 0.0.255.255 in area 100.,"enable
+configure terminal
+router ospf 100
+network 172.16.0.0 0.0.255.255 area 100
+end"
+Enable OSPF process 100 and advertise 192.168.10.0 0.0.255.255 in area 1.,enable ospf process 100 and advertise 192.168.10.0 0.0.255.255 in area 1.,"enable
+configure terminal
+router ospf 100
+network 192.168.10.0 0.0.255.255 area 1
+end"
+Enable OSPF process 100 and advertise 192.168.10.0 0.0.255.255 in area 10.,enable ospf process 100 and advertise 192.168.10.0 0.0.255.255 in area 10.,"enable
+configure terminal
+router ospf 100
+network 192.168.10.0 0.0.255.255 area 10
+end"
+Enable OSPF process 100 and advertise 192.168.10.0 0.0.255.255 in area 100.,enable ospf process 100 and advertise 192.168.10.0 0.0.255.255 in area 100.,"enable
+configure terminal
+router ospf 100
+network 192.168.10.0 0.0.255.255 area 100
+end"
+Enable OSPF process 100 and advertise 192.168.10.0 0.255.255.255 in area 10.,enable ospf process 100 and advertise 192.168.10.0 0.255.255.255 in area 10.,"enable
+configure terminal
+router ospf 100
+network 192.168.10.0 0.255.255.255 area 10
+end"
+Enable OSPF process 10 and advertise 10.0.0.0 0.0.0.255 in area 1.,enable ospf process 10 and advertise 10.0.0.0 0.0.0.255 in area 1.,"enable
+configure terminal
+router ospf 10
+network 10.0.0.0 0.0.0.255 area 1
+end"
+Enable OSPF process 10 and advertise 10.0.0.0 0.0.0.255 in area 10.,enable ospf process 10 and advertise 10.0.0.0 0.0.0.255 in area 10.,"enable
+configure terminal
+router ospf 10
+network 10.0.0.0 0.0.0.255 area 10
+end"
+Enable OSPF process 10 and advertise 10.0.0.0 0.0.255.255 in area 1.,enable ospf process 10 and advertise 10.0.0.0 0.0.255.255 in area 1.,"enable
+configure terminal
+router ospf 10
+network 10.0.0.0 0.0.255.255 area 1
+end"
+Enable OSPF process 10 and advertise 10.0.0.0 0.255.255.255 in area 0.,enable ospf process 10 and advertise 10.0.0.0 0.255.255.255 in area 0.,"enable
+configure terminal
+router ospf 10
+network 10.0.0.0 0.255.255.255 area 0
+end"
+Enable OSPF process 10 and advertise 10.0.0.0 0.255.255.255 in area 100.,enable ospf process 10 and advertise 10.0.0.0 0.255.255.255 in area 100.,"enable
+configure terminal
+router ospf 10
+network 10.0.0.0 0.255.255.255 area 100
+end"
+Enable OSPF process 10 and advertise 10.1.0.0 0.0.0.255 in area 10.,enable ospf process 10 and advertise 10.1.0.0 0.0.0.255 in area 10.,"enable
+configure terminal
+router ospf 10
+network 10.1.0.0 0.0.0.255 area 10
+end"
+Enable OSPF process 10 and advertise 10.1.0.0 0.0.255.255 in area 0.,enable ospf process 10 and advertise 10.1.0.0 0.0.255.255 in area 0.,"enable
+configure terminal
+router ospf 10
+network 10.1.0.0 0.0.255.255 area 0
+end"
+Enable OSPF process 10 and advertise 10.1.0.0 0.0.255.255 in area 1.,enable ospf process 10 and advertise 10.1.0.0 0.0.255.255 in area 1.,"enable
+configure terminal
+router ospf 10
+network 10.1.0.0 0.0.255.255 area 1
+end"
+Enable OSPF process 10 and advertise 10.1.0.0 0.0.255.255 in area 10.,enable ospf process 10 and advertise 10.1.0.0 0.0.255.255 in area 10.,"enable
+configure terminal
+router ospf 10
+network 10.1.0.0 0.0.255.255 area 10
+end"
+Enable OSPF process 10 and advertise 10.1.0.0 0.255.255.255 in area 1.,enable ospf process 10 and advertise 10.1.0.0 0.255.255.255 in area 1.,"enable
+configure terminal
+router ospf 10
+network 10.1.0.0 0.255.255.255 area 1
+end"
+Enable OSPF process 10 and advertise 172.16.0.0 0.0.0.255 in area 10.,enable ospf process 10 and advertise 172.16.0.0 0.0.0.255 in area 10.,"enable
+configure terminal
+router ospf 10
+network 172.16.0.0 0.0.0.255 area 10
+end"
+Enable OSPF process 10 and advertise 172.16.0.0 0.255.255.255 in area 1.,enable ospf process 10 and advertise 172.16.0.0 0.255.255.255 in area 1.,"enable
+configure terminal
+router ospf 10
+network 172.16.0.0 0.255.255.255 area 1
+end"
+Enable OSPF process 10 and advertise 172.16.0.0 0.255.255.255 in area 100.,enable ospf process 10 and advertise 172.16.0.0 0.255.255.255 in area 100.,"enable
+configure terminal
+router ospf 10
+network 172.16.0.0 0.255.255.255 area 100
+end"
+Enable OSPF process 10 and advertise 192.168.10.0 0.0.0.255 in area 100.,enable ospf process 10 and advertise 192.168.10.0 0.0.0.255 in area 100.,"enable
+configure terminal
+router ospf 10
+network 192.168.10.0 0.0.0.255 area 100
+end"
+Enable OSPF process 10 and advertise 192.168.10.0 0.0.255.255 in area 0.,enable ospf process 10 and advertise 192.168.10.0 0.0.255.255 in area 0.,"enable
+configure terminal
+router ospf 10
+network 192.168.10.0 0.0.255.255 area 0
+end"
+Enable OSPF process 10 and advertise 192.168.10.0 0.255.255.255 in area 1.,enable ospf process 10 and advertise 192.168.10.0 0.255.255.255 in area 1.,"enable
+configure terminal
+router ospf 10
+network 192.168.10.0 0.255.255.255 area 1
+end"
+Enable OSPF process 10 and advertise 192.168.10.0 0.255.255.255 in area 10.,enable ospf process 10 and advertise 192.168.10.0 0.255.255.255 in area 10.,"enable
+configure terminal
+router ospf 10
+network 192.168.10.0 0.255.255.255 area 10
+end"
+Enable OSPF process 10 and advertise 192.168.10.0 0.255.255.255 in area 100.,enable ospf process 10 and advertise 192.168.10.0 0.255.255.255 in area 100.,"enable
+configure terminal
+router ospf 10
+network 192.168.10.0 0.255.255.255 area 100
+end"
+Enable OSPF process 1 and advertise 10.0.0.0 0.0.0.255 in area 0.,enable ospf process 1 and advertise 10.0.0.0 0.0.0.255 in area 0.,"enable
+configure terminal
+router ospf 1
+network 10.0.0.0 0.0.0.255 area 0
+end"
+Enable OSPF process 1 and advertise 10.0.0.0 0.0.0.255 in area 1.,enable ospf process 1 and advertise 10.0.0.0 0.0.0.255 in area 1.,"enable
+configure terminal
+router ospf 1
+network 10.0.0.0 0.0.0.255 area 1
+end"
+Enable OSPF process 1 and advertise 10.0.0.0 0.0.255.255 in area 1.,enable ospf process 1 and advertise 10.0.0.0 0.0.255.255 in area 1.,"enable
+configure terminal
+router ospf 1
+network 10.0.0.0 0.0.255.255 area 1
+end"
+Enable OSPF process 1 and advertise 10.0.0.0 0.0.255.255 in area 10.,enable ospf process 1 and advertise 10.0.0.0 0.0.255.255 in area 10.,"enable
+configure terminal
+router ospf 1
+network 10.0.0.0 0.0.255.255 area 10
+end"
+Enable OSPF process 1 and advertise 10.0.0.0 0.255.255.255 in area 0.,enable ospf process 1 and advertise 10.0.0.0 0.255.255.255 in area 0.,"enable
+configure terminal
+router ospf 1
+network 10.0.0.0 0.255.255.255 area 0
+end"
+Enable OSPF process 1 and advertise 10.1.0.0 0.0.255.255 in area 10.,enable ospf process 1 and advertise 10.1.0.0 0.0.255.255 in area 10.,"enable
+configure terminal
+router ospf 1
+network 10.1.0.0 0.0.255.255 area 10
+end"
+Enable OSPF process 1 and advertise 10.1.0.0 0.0.255.255 in area 100.,enable ospf process 1 and advertise 10.1.0.0 0.0.255.255 in area 100.,"enable
+configure terminal
+router ospf 1
+network 10.1.0.0 0.0.255.255 area 100
+end"
+Enable OSPF process 1 and advertise 10.1.0.0 0.255.255.255 in area 0.,enable ospf process 1 and advertise 10.1.0.0 0.255.255.255 in area 0.,"enable
+configure terminal
+router ospf 1
+network 10.1.0.0 0.255.255.255 area 0
+end"
+Enable OSPF process 1 and advertise 10.1.0.0 0.255.255.255 in area 10.,enable ospf process 1 and advertise 10.1.0.0 0.255.255.255 in area 10.,"enable
+configure terminal
+router ospf 1
+network 10.1.0.0 0.255.255.255 area 10
+end"
+Enable OSPF process 1 and advertise 172.16.0.0 0.0.255.255 in area 100.,enable ospf process 1 and advertise 172.16.0.0 0.0.255.255 in area 100.,"enable
+configure terminal
+router ospf 1
+network 172.16.0.0 0.0.255.255 area 100
+end"
+Enable OSPF process 1 and advertise 172.16.0.0 0.255.255.255 in area 100.,enable ospf process 1 and advertise 172.16.0.0 0.255.255.255 in area 100.,"enable
+configure terminal
+router ospf 1
+network 172.16.0.0 0.255.255.255 area 100
+end"
+Enable OSPF process 1 and advertise 192.168.10.0 0.0.0.255 in area 100.,enable ospf process 1 and advertise 192.168.10.0 0.0.0.255 in area 100.,"enable
+configure terminal
+router ospf 1
+network 192.168.10.0 0.0.0.255 area 100
+end"
+Enable OSPF process 1 and advertise 192.168.10.0 0.255.255.255 in area 0.,enable ospf process 1 and advertise 192.168.10.0 0.255.255.255 in area 0.,"enable
+configure terminal
+router ospf 1
+network 192.168.10.0 0.255.255.255 area 0
+end"
+Enable OSPF process 1 and advertise 192.168.10.0 0.255.255.255 in area 1.,enable ospf process 1 and advertise 192.168.10.0 0.255.255.255 in area 1.,"enable
+configure terminal
+router ospf 1
+network 192.168.10.0 0.255.255.255 area 1
+end"
+Filter OSPFv3 routes using a prefix-list during redistribution.,filter ospfv3 routes using a prefix-list during redistribution.,"enable
+configure terminal
+ipv6 prefix-list MY-NETWORKS permit 2001:db8:1::/48
+ipv6 router ospf 1
+redistribute connected prefix-list MY-NETWORKS
+end"
+"How do I implement the NAC-RESTRICT access list and enable DHCP snooping and ARP inspection for VLANs 10, 20, 30, and 99?","how do i implement the nac-restrict access list and enable dhcp snooping and arp inspection for vlans 10, 20, 30, and 99?","ip access-list extended NAC-RESTRICT
+permit ip 10.1.0.0 0.0.0.255 10.2.0.0 0.0.0.255 eq 80
+deny ip any any log
+ip dhcp snooping vlan 10,20,30,99
+ip dhcp snooping
+ip arp inspection vlan 10,20,30,99"
+I need to set the lease time for the HR_DEPT pool to 8 hours instead of the default.,i need to set the lease time for the hr_dept pool to 8 hours instead of the default.,"enable
+configure terminal
+ip dhcp pool HR_DEPT
+lease 0 8 0
+exit
+end"
+I want to reserve a static IP 192.168.1.50 for a printer with MAC address 000c.29f4.b3d2 in the server pool.,i want to reserve a static ip 192.168.1.50 for a printer with mac address 000c.29f4.b3d2 in the server pool.,"enable
+configure terminal
+ip dhcp pool PRINTER_RESERVATION
+host 192.168.1.50 255.255.255.0
+client-identifier 0100.0c29.f4b3.d2
+exit
+end"
+Please configure a DHCP pool for the sales team on 192.168.30.0/24 and define the domain name as internal.corp.,please configure a dhcp pool for the sales team on 192.168.30.0/24 and define the domain name as internal.corp.,"enable
+configure terminal
+ip dhcp pool SALES_TEAM
+network 192.168.30.0 255.255.255.0
+default-router 192.168.30.1
+domain-name internal.corp
+exit
+end"
+question,question,
+Redistribute connected IPv6 prefixes into OSPFv3 process 1.,redistribute connected ipv6 prefixes into ospfv3 process 1.,"enable
+configure terminal
+ipv6 router ospf 1
+redistribute connected
+end"
+Redistribute connected routes into OSPF process 1.,redistribute connected routes into ospf process 1.,"enable
+configure terminal
+router ospf 1
+redistribute connected subnets
+end"
+Redistribute connected routes into OSPF process 10.,redistribute connected routes into ospf process 10.,"enable
+configure terminal
+router ospf 10
+redistribute connected subnets
+end"
+Redistribute connected routes into OSPF process 100.,redistribute connected routes into ospf process 100.,"enable
+configure terminal
+router ospf 100
+redistribute connected subnets
+end"
+Restrict SNMP access to a specific ACL named 'SNMP-TRUSTED' to ensure only authorized management stations can poll the device.,restrict snmp access to a specific acl named 'snmp-trusted' to ensure only authorized management stations can poll the device.,"enable
+configure terminal
+ip access-list standard SNMP-TRUSTED
+permit 10.50.1.10
+exit
+snmp-server community public ro SNMP-TRUSTED
+end"
+Route traffic destined for 8.8.8.8 through interface Serial0/1/0 instead of the standard path.,route traffic destined for 8.8.8.8 through interface serial0/1/0 instead of the standard path.,"enable
+configure terminal
+access-list 190 permit ip any host 8.8.8.8
+route-map DNS_FORCE permit 10
+match ip address 190
+set interface Serial0/1/0
+exit
+interface GigabitEthernet0/10
+ip policy route-map DNS_FORCE
+end"
+Route traffic from 172.16.0.0/16 to interface Serial0/0/0 if the destination is unknown in the routing table.,route traffic from 172.16.0.0/16 to interface serial0/0/0 if the destination is unknown in the routing table.,"enable
+configure terminal
+access-list 20 permit 172.16.0.0 0.0.255.255
+route-map WAN_FORCE permit 10
+match ip address 20
+set interface Serial0/0/0
+exit
+interface GigabitEthernet0/2
+ip policy route-map WAN_FORCE
+end"
+"Set next-hop to 10.0.0.1 for traffic matching ACL 170, with a fallback to normal routing.","set next-hop to 10.0.0.1 for traffic matching acl 170, with a fallback to normal routing.","enable
+configure terminal
+access-list 170 permit tcp any any eq 80
+route-map WEB_TRAFFIC permit 10
+match ip address 170
+set ip next-hop 10.0.0.1
+exit
+interface Vlan5
+ip policy route-map WEB_TRAFFIC
+end"
+Set OSPF router-ID to 10.0.0.1 on process 1.,set ospf router-id to 10.0.0.1 on process 1.,"enable
+configure terminal
+router ospf 1
+router-id 10.0.0.1
+end"
+Set OSPF router-ID to 10.0.0.1 on process 10.,set ospf router-id to 10.0.0.1 on process 10.,"enable
+configure terminal
+router ospf 10
+router-id 10.0.0.1
+end"
+Set OSPF router-ID to 10.0.1.1 on process 1.,set ospf router-id to 10.0.1.1 on process 1.,"enable
+configure terminal
+router ospf 1
+router-id 10.0.1.1
+end"
+Set OSPF router-ID to 10.10.10.1 on process 1.,set ospf router-id to 10.10.10.1 on process 1.,"enable
+configure terminal
+router ospf 1
+router-id 10.10.10.1
+end"
+Set OSPF router-ID to 10.10.10.1 on process 10.,set ospf router-id to 10.10.10.1 on process 10.,"enable
+configure terminal
+router ospf 10
+router-id 10.10.10.1
+end"
+Set OSPF router-ID to 10.10.10.1 on process 100.,set ospf router-id to 10.10.10.1 on process 100.,"enable
+configure terminal
+router ospf 100
+router-id 10.10.10.1
+end"
+Set OSPF router-ID to 10.1.1.1 on process 10.,set ospf router-id to 10.1.1.1 on process 10.,"enable
+configure terminal
+router ospf 10
+router-id 10.1.1.1
+end"
+Set OSPF router-ID to 10.1.1.1 on process 100.,set ospf router-id to 10.1.1.1 on process 100.,"enable
+configure terminal
+router ospf 100
+router-id 10.1.1.1
+end"
+Set OSPF router-ID to 172.16.0.1 on process 1.,set ospf router-id to 172.16.0.1 on process 1.,"enable
+configure terminal
+router ospf 1
+router-id 172.16.0.1
+end"
+Set OSPF router-ID to 172.16.0.1 on process 10.,set ospf router-id to 172.16.0.1 on process 10.,"enable
+configure terminal
+router ospf 10
+router-id 172.16.0.1
+end"
+Set OSPF router-ID to 172.16.0.1 on process 100.,set ospf router-id to 172.16.0.1 on process 100.,"enable
+configure terminal
+router ospf 100
+router-id 172.16.0.1
+end"
+Set OSPF router-ID to 172.31.0.1 on process 1.,set ospf router-id to 172.31.0.1 on process 1.,"enable
+configure terminal
+router ospf 1
+router-id 172.31.0.1
+end"
+Set OSPF router-ID to 172.31.0.1 on process 10.,set ospf router-id to 172.31.0.1 on process 10.,"enable
+configure terminal
+router ospf 10
+router-id 172.31.0.1
+end"
+Set OSPF router-ID to 172.31.0.1 on process 100.,set ospf router-id to 172.31.0.1 on process 100.,"enable
+configure terminal
+router ospf 100
+router-id 172.31.0.1
+end"
+Set OSPF router-ID to 192.168.100.1 on process 10.,set ospf router-id to 192.168.100.1 on process 10.,"enable
+configure terminal
+router ospf 10
+router-id 192.168.100.1
+end"
+Set OSPF router-ID to 192.168.100.1 on process 100.,set ospf router-id to 192.168.100.1 on process 100.,"enable
+configure terminal
+router ospf 100
+router-id 192.168.100.1
+end"
+Set OSPF router-ID to 192.168.1.1 on process 1.,set ospf router-id to 192.168.1.1 on process 1.,"enable
+configure terminal
+router ospf 1
+router-id 192.168.1.1
+end"
+Set OSPF router-ID to 192.168.1.1 on process 10.,set ospf router-id to 192.168.1.1 on process 10.,"enable
+configure terminal
+router ospf 10
+router-id 192.168.1.1
+end"
+Set OSPF router-ID to 192.168.1.1 on process 100.,set ospf router-id to 192.168.1.1 on process 100.,"enable
+configure terminal
+router ospf 100
+router-id 192.168.1.1
+end"
+Set up a DHCP pool for guest Wi-Fi on the 10.50.0.0/22 network and exclude the first 10 addresses from being assigned.,set up a dhcp pool for guest wi-fi on the 10.50.0.0/22 network and exclude the first 10 addresses from being assigned.,"enable
+configure terminal
+ip dhcp excluded-address 10.50.0.1 10.50.0.10
+ip dhcp pool GUEST_WIFI
+network 10.50.0.0 255.255.252.0
+default-router 10.50.0.1
+exit
+end"
+Set up a DHCP pool for management traffic on the 10.0.0.0/29 network.,set up a dhcp pool for management traffic on the 10.0.0.0/29 network.,"enable
+configure terminal
+ip dhcp pool MGMT_VLAN
+network 10.0.0.0 255.255.255.248
+default-router 10.0.0.1
+exit
+end"
+Set up PBR to load-balance traffic across two next-hops 10.10.10.1 and 10.10.10.2.,set up pbr to load-balance traffic across two next-hops 10.10.10.1 and 10.10.10.2.,"enable
+configure terminal
+access-list 120 permit ip any any
+route-map LOAD_BALANCE permit 10
+match ip address 120
+set ip next-hop 10.10.10.1 10.10.10.2
+exit
+interface GigabitEthernet0/4
+ip policy route-map LOAD_BALANCE
+end"
+Set up the local device to synchronize time with 216.239.35.0 while restricting updates to the local network.,set up the local device to synchronize time with 216.239.35.0 while restricting updates to the local network.,"enable
+configure terminal
+ntp server 216.239.35.0
+ntp access-group serve-only 20
+access-list 20 permit 192.168.1.0 0.0.0.255
+end"
