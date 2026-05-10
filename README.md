@@ -20,6 +20,7 @@ Yasmine Ouni, Kamal Singh, Antoine Gourru, Farouk Mhamdi, "WIP: Large Language M
 - [Usage](#usage)
 - [Evaluation](#evaluation)
 - [Datasets](#datasets)
+- [Fine-tuning](#fine-tuning)
 - [Configuration Reference](#configuration-reference)
 
 ---
@@ -41,6 +42,11 @@ The pipeline is composed of four sequential stages:
 
 ```
 PDF documentation
+      │
+      ▼
+ 0. PDF → JSON  (data_pdf/pdf_to_json.py)           ← optional, if starting from PDFs
+    Font-driven extraction, 5 chunking strategies,
+    flat + hierarchical JSON output
       │
       ▼
  1. Chunking (chunking.py)
@@ -85,8 +91,16 @@ NetConfRAG/
 │   ├── basic_rag.py                 # Baseline 2 — flat RAG from raw PDFs
 │   └── hierarchical_rag_finetuned_reranker.py  # Baseline 5 — HRAG + FT + BM25 + reranking
 │
+├── data_pdf/
+│   ├── pdf_to_json.py               # PDF → JSON corpus builder (font-driven extraction)
+│   └── README.md                    # Instructions for placing source PDFs
+│
 ├── data_json/                       # JSON knowledge base (one file per PDF)
-├── data_pdf/                        # Source PDF documentation
+│   └── README.md
+│
+├── finetuning/
+│   └── finetune_e5.py               # Fine-tuning script for intfloat/e5-small-v2
+│
 ├── datasets/
 │   ├── NetConfRAG_17.csv            # Small evaluation set (17 questions)
 │   ├── NetConfRAG_144.csv           # Full evaluation set (144 questions)
@@ -128,6 +142,11 @@ For Gemini evaluation:
 pip install google-generativeai
 ```
 
+For PDF extraction (`data_pdf/pdf_to_json.py`):
+```bash
+pip install pdfplumber langchain-text-splitters tqdm
+```
+
 For Ollama evaluation, install [Ollama](https://ollama.com) and pull at least one judge model:
 ```bash
 ollama pull llama3.3:70b
@@ -135,32 +154,41 @@ ollama pull llama3.3:70b
 
 ### HuggingFace Access
 
-The LLM (`meta-llama/Llama-3.2-3B-Instruct`) is a gated model. You need a HuggingFace account with access granted, then set your token in `config.py`:
-
-
-> **Security note:** Never commit a real token. Use an environment variable instead we use:
-> ```python
-> import os
-> HF_TOKEN = os.environ.get("HF_TOKEN", "")
-> ```
-
-Thus, set your HF TOKEN as an environment variable:
+The LLM (`meta-llama/Llama-3.2-3B-Instruct`) is a gated model. You need a HuggingFace account with access granted, then set your token as an environment variable:
 
 ```bash
-export HF_TOKEN="your_HuggingFace_Token_here"
+export HF_TOKEN="your_HuggingFace_token_here"
 ```
 
-
-For the Gemini evaluator, set your API key as an environment variable:
+For the Gemini evaluator:
 ```bash
 export GEMINI_API_KEY="your_key_here"
 ```
+
+> **Security note:** Never commit API keys or tokens to version control. Both secrets are read via `os.environ.get(...)` in `config.py` — no hardcoded values.
 
 ---
 
 ## Usage
 
-Run the stages in order:
+### 0. Build the JSON corpus from PDFs (optional)
+
+If you are starting from raw PDF documentation rather than pre-built JSON files, use the font-driven extractor:
+
+```bash
+# Recommended: font-driven, block-preserving, both output formats
+python data_pdf/pdf_to_json.py --input data_pdf/ --strategy block_preserve --deduplicate --verbose
+
+# Ablation sweep over chunk sizes
+for size in 64 128 256 512; do
+  python data_pdf/pdf_to_json.py --input data_pdf/ --strategy block_preserve \
+      --chunk-size $size --hier-out data_json/hier_${size}.json --mode hierarchical
+done
+```
+
+Available strategies: `paragraph`, `fixed`, `semantic`, `section`, `block_preserve` (default, recommended — never splits mid-command or mid-step table).
+
+Place the resulting JSON files in `data_json/` before running stage 1.
 
 ### 1. Chunk the knowledge base
 
@@ -178,7 +206,7 @@ Outputs `chunks.json`.
 python build_vectorstore.py
 ```
 
-Outputs `faiss_index/`. Requires a fine-tuned checkpoint in `e5-finetuned/` (see `config.py`).
+Outputs `faiss_index/`. Requires a fine-tuned checkpoint in `e5-finetuned/` (see [Fine-tuning](#fine-tuning) or download below).
 
 ### 3. Run RAG inference
 
@@ -262,6 +290,69 @@ Each CSV must contain at minimum a `question` column. Inference scripts append a
 
 ---
 
+## Fine-tuning
+
+The `finetuning/` directory contains the training script for domain-adapting `intfloat/e5-small-v2` on Cisco RAG triplets.
+
+### Script
+
+`finetuning/finetune_e5.py` — fine-tunes e5-small-v2 using in-batch negatives + margin loss on `(query, positive_passage, negative_passage)` triplets. Checkpoints are saved in SentenceTransformer/HuggingFace format and are directly consumable by `build_vectorstore.py`.
+
+> **Note:** The triplet generation script is not yet included in this repository and will be added in a future release.
+
+### Usage
+
+```bash
+# Full training run (auto-split into train/val by topic)
+python finetuning/finetune_e5.py --triplets triplets.jsonl --output-dir ./e5-finetuned
+
+# Pre-split files
+python finetuning/finetune_e5.py \
+    --train triplets_train.jsonl \
+    --val   triplets_val.jsonl \
+    --output-dir ./e5-finetuned
+
+# Smoke test (fast sanity check, 1 epoch, truncated data)
+python finetuning/finetune_e5.py --triplets triplets.jsonl --smoke-test
+
+# Eval-only mode (score an existing checkpoint)
+python finetuning/finetune_e5.py --triplets triplets.jsonl --eval-only \
+    --output-dir ./e5-finetuned
+```
+
+Key training flags:
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--epochs` | 5 | Number of training epochs |
+| `--batch-size` | 32 | Per-device batch size |
+| `--lr` | 2e-5 | Peak learning rate |
+| `--temperature` | 0.02 | InfoNCE softmax temperature |
+| `--bf16` / `--fp16` | off | Mixed-precision training |
+| `--score-threshold` | 2 | Minimum triplet quality score to keep |
+| `--eval-every` | 200 | Evaluate on validation set every N steps |
+| `--save-every` | 400 | Save `checkpoint_latest` every N steps |
+
+The script automatically resumes from `checkpoint_latest` if it exists in the output directory.
+
+### Pre-trained checkpoint
+
+The fine-tuned checkpoint used in the paper is available for download:
+
+**[Download `e5-finetuned/` from Google Drive](https://drive.google.com/your-link-here)**
+
+Place the contents in `./e5-finetuned/` (i.e., `config.py`'s `CHECKPOINT_DIR`). The directory must contain `checkpoint_best/` with model weights and `sentence_bert_config.json`.
+
+### Additional requirements for fine-tuning
+
+```bash
+pip install torch transformers
+# Optional: 8-bit Adam for reduced GPU memory usage
+pip install bitsandbytes
+```
+
+---
+
 ## Configuration Reference
 
 All settings are in `config.py`:
@@ -269,11 +360,11 @@ All settings are in `config.py`:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `DATA_JSON_DIR` | `data_json/` | JSON knowledge-base directory |
-| `DATA_PDF_DIR` | `data_pdf/` | Source PDF directory (Baseline 2 only) |
+| `DATA_PDF_DIR` | `data_pdf/` | Source PDF directory (Baseline 2 / pdf_to_json only) |
 | `CHUNKS_JSON` | `chunks.json` | Output of chunking stage |
 | `CHECKPOINT_DIR` | `./e5-finetuned/` | Fine-tuned e5 embedding checkpoints |
 | `LLM_MODEL_ID` | `meta-llama/Llama-3.2-3B-Instruct` | HuggingFace model ID |
-| `HF_TOKEN` | *(must be set)* | HuggingFace auth token |
+| `HF_TOKEN` | *(env var)* | HuggingFace auth token — set via `export HF_TOKEN=...` |
 | `CHUNK_MAX_TOKENS` | `512` | Max tokens per chunk |
 | `CHUNK_OVERLAP_TOKENS` | `50` | Overlap between adjacent chunks |
 | `RAG_K` | `4` | Number of retrieved chunks passed to LLM |
