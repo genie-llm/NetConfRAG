@@ -339,7 +339,7 @@ The script automatically resumes from `checkpoint_latest` if it exists in the ou
 
 The fine-tuned checkpoint used in the paper is available for download:
 
-**[Download `e5-finetuned/` from Google Drive](https://drive.google.com/your-link-here)**
+**[(TODO will upload soon) Download `e5-finetuned/` from Google Drive](https://drive.google.com/)**
 
 Place the contents in `./e5-finetuned/` (i.e., `config.py`'s `CHECKPOINT_DIR`). The directory must contain `checkpoint_best/` with model weights and `sentence_bert_config.json`.
 
