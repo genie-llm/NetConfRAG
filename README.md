@@ -6,7 +6,7 @@ The project focuses on a small local model setup (Llama 3.2 3B) and compares mul
 
 If this repository helps your work, please cite:
 
-Yasmine Ouni, Kamal Singh, Antoine Gourru, Farouk Mhamdi, "WIP: Large Language Models for Network Automation: A Hierarchical Retrieval-Augmented Approach", 27th IEEE International Symposium on a World of Wireless, Mobile and Multimedia Networks (WoWMoM), Bologna, Italy, June 16-19, 2026.
+> Yasmine Ouni, Kamal Singh, Antoine Gourru, Farouk Mhamdi, "WIP: Large Language Models for Network Automation: A Hierarchical Retrieval-Augmented Approach", 27th IEEE International Symposium on a World of Wireless, Mobile and Multimedia Networks (WoWMoM), Bologna, Italy, June 16-19, 2026. [HAL link](https://hal.science/hal-05613494v1/file/Towards_Autonomous_Network_Configuration_with_LLMs-15.pdf)
 
 ## What is in this repo
 
